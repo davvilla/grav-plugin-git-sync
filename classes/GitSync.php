@@ -155,9 +155,7 @@ class GitSync extends Git
         $url = $this->getConfig('repository', $url);
 
         if ($authenticated) {
-            $user = $this->user ?: $this->config->get('user');
-            $password = Helper::decrypt($this->password ?: $this->config->get('password'));
-            $url = Helper::prepareRepository($user, $password, $url);
+            $url = $this->buildAuthUrl($url);
         }
 
         $command = $this->hasRemote($alias) ? 'set-url' : 'add';
@@ -218,7 +216,9 @@ class GitSync extends Git
         $name = $this->getRemote('name', $name);
         $branch = $this->getRemote('branch', $branch);
 
-        return $this->execute("fetch {$name} {$branch}");
+        $auth = $this->buildAuthUrl($this->getConfig('repository', null));
+
+        return $this->execute("-c remote.{$name}.url={$auth} fetch {$name} {$branch}");
     }
 
     public function pull($name = null, $branch = null)
@@ -335,5 +335,13 @@ class GitSync extends Git
     public function getConfig($type, $value)
     {
         return !$value && isset($this->config[$type]) ? $this->config[$type] : $value;
+    }
+
+    public function buildAuthUrl($url)
+    {
+        $user = $this->user ?: $this->config->get('user');
+        $password = Helper::decrypt($this->password ?: $this->config->get('password'));
+        $url = Helper::prepareRepository($user, $password, $url);
+        return $url;
     }
 }
