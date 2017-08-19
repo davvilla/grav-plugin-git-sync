@@ -218,7 +218,7 @@ class GitSync extends Git
 
         $auth = $this->buildAuthUrl($this->getConfig('repository', null));
 
-        return $this->execute("-c remote.{$name}.url={$auth} fetch {$name} {$branch}");
+        return $this->execute("-c \"remote.{$name}.url={$auth}\" fetch {$name} {$branch}");
     }
 
     public function pull($name = null, $branch = null)
